@@ -28,10 +28,16 @@ class GoogleAPIController {
 
       const calendarAPI = google.calendar({version: 'v3', auth: auth2client})
 
-      const calendar = await calendarAPI.calendarList.get({calendarId: process.env.CALENDAR_ID})
+      const events = await calendarAPI.events.list({
+        calendarId: process.env.CALENDAR_ID,
+        timeMin: new Date().toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime'
+      })      
 
-      res.json({calendar})
+      res.json({events: events.data.items})
     } catch (error) {
+      console.log(error)
       res.status(500).json({
         error: 'Hubo un problema al conectarse con el calendario de Google'
       })
