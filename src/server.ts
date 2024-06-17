@@ -5,6 +5,8 @@ import cors from 'cors'
 import corsConfig from './config/cors'
 import morgan from 'morgan'
 import googleapiRouter from './routes/googleapiRouter'
+import eventsRouter from './routes/eventsRouter'
+import eventTypesRouter from './routes/eventTypesRouter'
 
 configDotenv()
 
@@ -21,5 +23,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/googleapi', googleapiRouter)
+app.use('/api/events', eventsRouter)
+app.use('/api/eventTypes', eventTypesRouter)
 
 export default app
