@@ -6,7 +6,7 @@ class EventsController {
         try {
             const events = await Event.find()
 
-            res.json({events})
+            res.json(events)
         } catch (error) {
             handleInternalError(error, 'Algo fallo al obtener los eventos', res)
         }
