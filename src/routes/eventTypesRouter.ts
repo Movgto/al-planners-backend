@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import EventTypesController from '../controllers/EventTypesController'
-import { body } from 'express-validator'
+import { body, param } from 'express-validator'
 import inputValidation from '../middleware/inputValidation'
 
 const router = Router()
@@ -21,6 +21,12 @@ router.post('/',
     }),
     inputValidation,
     EventTypesController.createEventType
+)
+
+router.delete('/:eventTypeId',
+    param('eventTypeId').isMongoId().withMessage('Invlaid event type id'),
+    inputValidation,
+    EventTypesController.deleteEventType
 )
 
 export default router
