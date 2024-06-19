@@ -14,6 +14,8 @@ connectDB()
 
 const app = express()
 
+app.use(express.json())
+
 app.use(cors(corsConfig))
 
 app.use(morgan('dev'))
