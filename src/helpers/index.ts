@@ -1,9 +1,37 @@
 import colors from 'colors'
 import {Response} from 'express'
+import { IAvailabilityTime } from '../models/AvailabilityTime'
 
 export const handleInternalError = (error: unknown, errorMsg: string, res: Response) => {
     const err = new Error(errorMsg)
     console.log(colors.bgMagenta(err.message))
     console.log(error)
     res.status(500).json({error: err.message})
+}
+
+export const isAvailabilityValid = (availability: IAvailabilityTime, availabilityToCompare: IAvailabilityTime) => {
+    const newAvailabilityStartHour = new Date(availability.startTime).getHours()
+    const newAvailabilityEndHour = new Date(availability.endTime).getHours()
+    const availabilityStartHour = new Date(availabilityToCompare.startTime).getHours()
+    const availabilityEndHour = new Date(availabilityToCompare.endTime).getHours()
+
+    const differenceBetweenHours = Math.abs(newAvailabilityStartHour - newAvailabilityEndHour)
+
+    console.log('====== Difference betweenhours ======')
+    console.log(differenceBetweenHours)
+
+    if (differenceBetweenHours < 1) return false
+
+    if (newAvailabilityStartHour === availabilityStartHour) return false
+    
+    if (
+        (newAvailabilityStartHour < availabilityStartHour && newAvailabilityEndHour > availabilityStartHour)
+        || (newAvailabilityStartHour < availabilityEndHour && newAvailabilityEndHour > availabilityEndHour)
+        || (availabilityStartHour < newAvailabilityStartHour && availabilityEndHour > newAvailabilityStartHour)
+        || (availabilityStartHour < newAvailabilityEndHour && availabilityEndHour > newAvailabilityEndHour)
+    ) {
+        return false
+    }
+
+    return true
 }

@@ -1,12 +1,18 @@
 import {Router} from 'express'
 import EventsController from '../controllers/EventsController'
-import { body } from 'express-validator'
+import { body, param } from 'express-validator'
 import inputValidation from '../middleware/inputValidation'
 
 const router = Router()
 
 router.get('/',
     EventsController.getEvents
+)
+
+router.get('/:eventId',
+    param('eventId').isMongoId().withMessage('Event id not valid'),
+    inputValidation,
+    EventsController.getEvent
 )
 
 router.post('/',

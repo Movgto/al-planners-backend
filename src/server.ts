@@ -7,6 +7,7 @@ import morgan from 'morgan'
 import googleapiRouter from './routes/googleapiRouter'
 import eventsRouter from './routes/eventsRouter'
 import eventTypesRouter from './routes/eventTypesRouter'
+import availabilityRouter from './routes/availabilityRoutes'
 
 configDotenv()
 
@@ -27,5 +28,6 @@ app.get('/', (req, res) => {
 app.use('/api/googleapi', googleapiRouter)
 app.use('/api/events', eventsRouter)
 app.use('/api/eventTypes', eventTypesRouter)
+app.use('/api/availability', availabilityRouter)
 
 export default app

@@ -15,7 +15,7 @@ const rangeSchema : Schema = new Schema({
     dateTime: String
 })
 
-const eventSchema : Schema = new Schema({
+export const eventSchema : Schema = new Schema({
     summary: {
         type: String,
         required: true
