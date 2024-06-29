@@ -1,12 +1,12 @@
 import colors from 'colors'
-import {Response} from 'express'
+import { Response } from 'express'
 import { IAvailabilityTime } from '../models/AvailabilityTime'
 
 export const handleInternalError = (error: unknown, errorMsg: string, res: Response) => {
     const err = new Error(errorMsg)
     console.log(colors.bgMagenta(err.message))
     console.log(error)
-    res.status(500).json({error: err.message})
+    res.status(500).json({ error: err.message })
 }
 
 export const isAvailabilityValid = (availability: IAvailabilityTime, availabilityToCompare: IAvailabilityTime) => {
@@ -23,7 +23,7 @@ export const isAvailabilityValid = (availability: IAvailabilityTime, availabilit
     if (differenceBetweenHours < 1) return false
 
     if (newAvailabilityStartHour === availabilityStartHour) return false
-    
+
     if (
         (newAvailabilityStartHour < availabilityStartHour && newAvailabilityEndHour > availabilityStartHour)
         || (newAvailabilityStartHour < availabilityEndHour && newAvailabilityEndHour > availabilityEndHour)
@@ -34,4 +34,22 @@ export const isAvailabilityValid = (availability: IAvailabilityTime, availabilit
     }
 
     return true
+}
+
+export const dateFormater = (isoDate: string) => {
+    const date = new Date(isoDate)
+    const displayDate = new Intl.DateTimeFormat('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: '2-digit'        
+    }).format(date)
+    return displayDate
+}
+
+export const formatHour = (hour: number) => {
+    const timeOfDay = hour >= 12 ? 'pm' : 'am'
+
+    const newHour = hour > 12 ? hour - 12 : hour
+
+    return newHour + timeOfDay
 }
