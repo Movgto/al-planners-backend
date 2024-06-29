@@ -53,3 +53,11 @@ export const formatHour = (hour: number) => {
 
     return newHour + timeOfDay
 }
+
+export const getDateInTimezoneFromISO = (isoDate: string) => {
+    return new Date(new Date(isoDate).toLocaleString('en-US', {timeZone: 'America/Mexico_City'}))
+}
+
+export const getDateInTimezone = (date: Date) => {
+    return new Date(date.toLocaleString('en-US', {timeZone: 'America/Mexico_City'}))
+}
