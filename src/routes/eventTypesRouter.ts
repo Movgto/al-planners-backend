@@ -9,6 +9,12 @@ router.get('/',
     EventTypesController.getEventTypes
 )
 
+router.get('/:eventTypeId',
+    param('eventTypeId').isMongoId().withMessage('Invalid event type id'),
+    inputValidation,
+    EventTypesController.getEventType
+)
+
 router.post('/',
     body('name').notEmpty().withMessage('Name must not be empty'),
     body('duration').isNumeric().withMessage('Duration must be a number'),
