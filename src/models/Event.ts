@@ -9,10 +9,25 @@ interface IEvent extends Document {
         dateTime: string        
     },
     sentToCalendar: boolean
+    attendee: {
+        name: string
+        email: string
+    }
 }
 
 const rangeSchema : Schema = new Schema({
     dateTime: String
+})
+
+const attendeeSchema : Schema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    }
 })
 
 export const eventSchema : Schema = new Schema({
@@ -31,6 +46,10 @@ export const eventSchema : Schema = new Schema({
     sentToCalendar: {
         type: Boolean,
         default: false
+    },
+    attendee: {
+        type: attendeeSchema,
+        required: true
     }
 }, {timestamps: true})
 
