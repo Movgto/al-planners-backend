@@ -1,7 +1,9 @@
 import Event from "../models/Event"
 import {Request, Response} from 'express'
-import { handleInternalError, isAvailabilityValid } from "../helpers"
+import { dateFormater, handleInternalError, isAvailabilityValid } from "../helpers"
 import AvailabilityTime, { IAvailabilityTime } from "../models/AvailabilityTime"
+import Mailing from "../services/Mailing"
+
 class EventsController {
     static getEvents = async (req: Request, res: Response) => {
         try {
@@ -27,7 +29,7 @@ class EventsController {
         } catch (error) {
             handleInternalError(error, 'Ocurrió un error al intentar obtener la cita', res)
         }
-    }
+    }    
 
     static createEvent = async (req: Request, res: Response) => {
         const event = req.body
@@ -108,6 +110,14 @@ class EventsController {
             }
 
             await newEvent.save()
+
+            const date = new Date(newEvent.start.dateTime)                       
+
+            Mailing.sendAppointmentNotification({
+                name: newEvent.attendee.name,
+                email: newEvent.attendee.email,
+                date: date
+            })
 
             res.send('Nuevo evento creado exitosamente!\nRecuerda sincronizar tus eventos.')
         } catch (error) {
