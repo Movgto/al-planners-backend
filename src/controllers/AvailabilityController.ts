@@ -65,7 +65,9 @@ class AvailabilityController {
     try {
       const date = new Date(isoDate)
 
-      const availableTimes = await AvailabilityTime.find()
+      const availableTimes = await AvailabilityTime.find().sort({
+        "startTime": "asc"
+      })
 
       
       const availableTimesArray = availableTimes.filter(a => {
@@ -101,6 +103,31 @@ class AvailabilityController {
       handleInternalError(error, 'Algo falló al intentar eliminar la disponibilidad', res)
     }
   }
+
+  static getAvailableTimes = async (req: Request, res: Response) => {
+    const {date: isoDate} = req.params
+    
+    try {
+        const date = new Date(isoDate)
+        date.setHours(0,0,0,0)
+
+        const availableTimes = await AvailabilityTime.find().sort({
+          "startTime": "asc"
+        })
+        
+        
+        const filtered = availableTimes.filter(a => {
+          const aDate = new Date(a.startTime)
+          if (aDate.getTime() < date.getTime()) return false
+
+          return true
+        })
+
+        res.json(filtered)
+    } catch (error) {
+        handleInternalError(error, 'Algo falló al intentar obtener la disponibilidad', res)
+    }
+}
 }
 
 export default AvailabilityController
