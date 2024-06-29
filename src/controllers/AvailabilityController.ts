@@ -1,6 +1,6 @@
 import {Request, Response} from 'express'
 import AvailabilityTime, { IAvailabilityTime } from '../models/AvailabilityTime'
-import { getDateInTimezone, handleInternalError, isAvailabilityValid } from '../helpers'
+import { getDateInTimezone, getDateInTimezoneFromISO, handleInternalError, isAvailabilityValid } from '../helpers'
 import colors from 'colors'
 
 class AvailabilityController {
@@ -114,7 +114,7 @@ class AvailabilityController {
     const {date: isoDate} = req.params
     
     try {
-        const date = new Date(isoDate)
+        const date = getDateInTimezoneFromISO(isoDate)
         date.setHours(0,0,0,0)
 
         const availableTimes = await AvailabilityTime.find().sort({
@@ -123,7 +123,7 @@ class AvailabilityController {
         
         
         const filtered = availableTimes.filter(a => {
-          const aDate = new Date(a.startTime)
+          const aDate = getDateInTimezone(new Date(a.startTime))
           if (aDate.getTime() < date.getTime()) return false
 
           return true
