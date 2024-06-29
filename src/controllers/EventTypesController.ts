@@ -14,6 +14,22 @@ class EventTypesController {
         }
     }
 
+    static getEventType = async (req: Request, res: Response) => {
+        const {eventTypeId} = req.params
+
+        try {
+            const eventExists = await EventType.findById(eventTypeId)
+
+            if (!eventExists) {
+                return res.status(404).json({error: 'Tipo de evento no encontrado'})
+            }
+
+            res.json(eventExists)
+        } catch (error) {
+            handleInternalError(error, 'Algo falló al intentar obtener el tipo de evento solicitado', res)
+        }
+    }
+
     static createEventType = async (req: Request, res: Response) => {
         try {
 
