@@ -1,6 +1,6 @@
 import {Request, Response} from 'express'
 import AvailabilityTime, { IAvailabilityTime } from '../models/AvailabilityTime'
-import { handleInternalError, isAvailabilityValid } from '../helpers'
+import { getDateInTimezone, handleInternalError, isAvailabilityValid } from '../helpers'
 import colors from 'colors'
 
 class AvailabilityController {
@@ -63,7 +63,10 @@ class AvailabilityController {
     const {date: isoDate} = req.params
 
     try {
-      const date = new Date(isoDate)
+      const date = new Date(new Date(isoDate).toLocaleString('en-US', {timeZone: 'America/Mexico_City'}))
+
+      console.log('====== Fecha para buscar disponibilidad ======')
+      console.log(date)
 
       const availableTimes = await AvailabilityTime.find().sort({
         "startTime": "asc"
@@ -71,9 +74,12 @@ class AvailabilityController {
 
       
       const availableTimesArray = availableTimes.filter(a => {
-        const aDate = new Date(a.startTime)
+        const aDate = getDateInTimezone(new Date(a.startTime))
 
-        if (aDate.getDate() === date.getDate()) {
+        console.log('====== Fecha disponible hora de inicio ======')
+        console.log(aDate)
+
+        if (aDate.getDate() === date.getDate()) {          
           return true
         }
 
