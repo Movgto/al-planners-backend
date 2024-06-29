@@ -8,6 +8,7 @@ import googleapiRouter from './routes/googleapiRouter'
 import eventsRouter from './routes/eventsRouter'
 import eventTypesRouter from './routes/eventTypesRouter'
 import availabilityRouter from './routes/availabilityRoutes'
+import authRouter from './routes/authRouter'
 
 configDotenv()
 
@@ -21,13 +22,12 @@ app.use(cors(corsConfig))
 
 app.use(morgan('dev'))
 
-app.get('/', (req, res) => {
-  res.send('Requests are working')
-})
-
 app.use('/api/googleapi', googleapiRouter)
 app.use('/api/events', eventsRouter)
 app.use('/api/eventTypes', eventTypesRouter)
 app.use('/api/availability', availabilityRouter)
+
+//Auth routes
+app.use('/api/auth', authRouter)
 
 export default app
