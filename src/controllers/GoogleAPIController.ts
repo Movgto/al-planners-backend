@@ -103,8 +103,12 @@ class GoogleAPIController {
               dateTime: e.end.dateTime,
               timeZone: 'America/Mexico_City'
             },
-            id: e.id
-          },           
+            id: e.id,
+            attendees: [{
+              displayName: e.attendee.name,
+              email: e.attendee.email
+            }]                 
+          }                       
         })
 
         e.sentToCalendar = true
@@ -143,7 +147,7 @@ class GoogleAPIController {
         requestBody: {
           summary,
           start,
-          end
+          end,          
         }
       })
 
@@ -165,6 +169,7 @@ class GoogleAPIController {
       }
 
       if (!eventExists.sentToCalendar) {
+        console.log("Eliminando evento que aún no se envía al calendario de Google!")
         await eventExists.deleteOne()
 
         return res.send('El evento se eliminó correctamente!')
