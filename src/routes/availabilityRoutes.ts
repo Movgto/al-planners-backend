@@ -12,6 +12,12 @@ router.post('/',
   AvailabilityController.createAvailableTime
 )
 
+router.post('/:date',
+  param('date').isISO8601().withMessage('Date format not valid'),
+  inputValidation,
+  AvailabilityController.getAvailableTimes
+)
+
 router.get('/:date',
   param('date').isISO8601().withMessage('Date format not valid'),
   inputValidation,
