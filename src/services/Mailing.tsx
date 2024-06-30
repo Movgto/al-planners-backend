@@ -32,7 +32,7 @@ class Mailing {
       attachments: [{
         cid: 'alplannerslogo',
         filename: 'al_planners_logo.png',
-        path: `${process.env.FRONTEND_URL}/public/al_planners_logo.png`
+        path: `${process.env.FRONTEND_URL}/al_planners_logo.png`
       }],
       html: html   
     })
