@@ -10,9 +10,9 @@ class AvailabilityController {
 
     try {
 
-      const date = new Date(startTime)
+      const date = getDateInTimezone(new Date(startTime))
 
-      const diffBetweenHrs = new Date(startTime).getHours() - new Date(endTime).getHours()
+      const diffBetweenHrs =  date.getHours() - getDateInTimezone(new Date(endTime)).getHours()
 
       const absDiffBetweenHrs = Math.abs(diffBetweenHrs)
 
@@ -25,7 +25,7 @@ class AvailabilityController {
       }
 
       const availableTimes = (await AvailabilityTime.find()).filter(a => {
-        const aDate = new Date(a.startTime)
+        const aDate = getDateInTimezone(new Date(a.startTime))
 
         if (date.getDate() === aDate.getDate()) {
           return true
@@ -63,7 +63,7 @@ class AvailabilityController {
     const {date: isoDate} = req.params
 
     try {
-      const date = new Date(new Date(isoDate).toLocaleString('en-US', {timeZone: process.env.TIMEZONE}))
+      const date = getDateInTimezone(new Date(isoDate))
 
       console.log('====== Fecha para buscar disponibilidad ======')
       console.log(date)

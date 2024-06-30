@@ -1,6 +1,6 @@
 import Event from "../models/Event"
 import {Request, Response} from 'express'
-import { dateFormater, handleInternalError, isAvailabilityValid } from "../helpers"
+import { dateFormater, getDateInTimezone, handleInternalError, isAvailabilityValid } from "../helpers"
 import AvailabilityTime, { IAvailabilityTime } from "../models/AvailabilityTime"
 import Mailing from "../services/Mailing"
 
@@ -40,16 +40,16 @@ class EventsController {
             
             const newEvent = new Event(event)
             
-            const newEventDate = new Date(newEvent.start.dateTime)
+            const newEventDate = getDateInTimezone(new Date(newEvent.start.dateTime))
             
             const newEventStartHour = newEventDate.getHours()
             
-            const newEventEndHour = new Date(newEvent.end.dateTime).getHours()
+            const newEventEndHour = getDateInTimezone(new Date(newEvent.end.dateTime)).getHours()
             
             const eventsWithSameStartTimes = events.filter(e => e.start.dateTime === newEvent.start.dateTime)
 
             const availableTimes = (await AvailabilityTime.find()).filter(a => {
-                const aDate = new Date(a.startTime)
+                const aDate = getDateInTimezone(new Date(a.startTime))
 
                 if (aDate.getDate() === newEventDate.getDate()) {
                     return true
@@ -87,11 +87,11 @@ class EventsController {
             let isInMiddleOfOtherEvent = false
 
             for (let e of events) {
-                const eDate = new Date(e.start.dateTime)
+                const eDate = getDateInTimezone(new Date(e.start.dateTime))
 
                 if (eDate.getDate() === newEventDate.getDate()) {
-                    const startHour = new Date(e.start.dateTime).getHours()
-                    const endHour = new Date(e.end.dateTime).getHours()                    
+                    const startHour = getDateInTimezone(new Date(e.start.dateTime)).getHours()
+                    const endHour = getDateInTimezone(new Date(e.end.dateTime)).getHours()                    
 
                     if (
                         (newEventStartHour < startHour && newEventEndHour > startHour)
@@ -111,7 +111,7 @@ class EventsController {
 
             await newEvent.save()
 
-            const date = new Date(newEvent.start.dateTime)                       
+            const date = getDateInTimezone(new Date(newEvent.start.dateTime))
 
             await Mailing.sendAppointmentNotification({
                 name: newEvent.attendee.name,
