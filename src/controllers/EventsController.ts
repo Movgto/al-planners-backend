@@ -113,7 +113,7 @@ class EventsController {
 
             const date = new Date(newEvent.start.dateTime)                       
 
-            Mailing.sendAppointmentNotification({
+            await Mailing.sendAppointmentNotification({
                 name: newEvent.attendee.name,
                 email: newEvent.attendee.email,
                 date: date
