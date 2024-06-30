@@ -63,7 +63,7 @@ class AvailabilityController {
     const {date: isoDate} = req.params
 
     try {
-      const date = new Date(new Date(isoDate).toLocaleString('en-US', {timeZone: 'America/Mexico_City'}))
+      const date = new Date(new Date(isoDate).toLocaleString('en-US', {timeZone: process.env.TIMEZONE}))
 
       console.log('====== Fecha para buscar disponibilidad ======')
       console.log(date)
