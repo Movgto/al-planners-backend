@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "./lib",
     "rootDir": "./src",
     "lib": [
       "ESNext",
       "DOM"
     ],
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "target": "es2017",    
+    // "moduleResolution": "NodeNext",
     "strict": true,
     "sourceMap": true,
     "declaration": true,
@@ -16,6 +18,7 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx"
   },
+  "compileOnSave": true,
   "include": [
     "./src/**/*.ts"    
   ]
