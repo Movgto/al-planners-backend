@@ -24,9 +24,9 @@ class EventTypesController {
                 return res.status(404).json({error: 'Tipo de evento no encontrado'})
             }
 
-            res.json(eventExists)
+            return res.json(eventExists)
         } catch (error) {
-            handleInternalError(error, 'Algo falló al intentar obtener el tipo de evento solicitado', res)
+            return handleInternalError(error, 'Algo falló al intentar obtener el tipo de evento solicitado', res)
         }
     }
 
@@ -54,9 +54,9 @@ class EventTypesController {
 
             await eventTypeExists.deleteOne()
 
-            res.send('Tipo de evento eliminado exitosamente!')
+            return res.send('Tipo de evento eliminado exitosamente!')
         } catch (error) {
-            handleInternalError(error, 'Algo falló al intentar eliminar el tipo de evento', res)
+            return handleInternalError(error, 'Algo falló al intentar eliminar el tipo de evento', res)
         }
     }
 }
