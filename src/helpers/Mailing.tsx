@@ -1,4 +1,3 @@
-import React from 'react'
 import { Html, Container, Body, Tailwind, Heading, Text, Img } from '@react-email/components'
 
 type MailingProps = {
