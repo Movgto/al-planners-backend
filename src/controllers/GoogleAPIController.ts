@@ -5,8 +5,6 @@ import { handleInternalError } from '../helpers'
 import Event from '../models/Event'
 import { google } from 'googleapis'
 
-import {writeFile, readFile} from 'fs'
-
 let refreshToken = ''
 
 const setCredentials = async (code: string) => {
@@ -116,45 +114,45 @@ class GoogleAPIController {
         await e.save()
       }
 
-      res.send('Eventos sincronizados con éxito!')
+      return res.send('Eventos sincronizados con éxito!')
       
     } catch (error) {      
-      handleInternalError(error, 'An error happened while trying to create an event', res)
+      return handleInternalError(error, 'An error happened while trying to create an event', res)
     }
 
   }
 
-  static createEvent = async (req: Request, res: Response) => {
-    const code = req.query.code as string
-    const {eventId} = req.params
+  // static createEvent = async (req: Request, res: Response) => {
+  //   const code = req.query.code as string
+  //   const {eventId} = req.params
 
-    try {
-      const eventExists = await Event.findById(eventId)
+  //   try {
+  //     const eventExists = await Event.findById(eventId)
 
-      if (!eventExists) {
-        return res.status(404).json({error: 'El evento que se desea sincronizar no fué encontrado'})
-      }
+  //     if (!eventExists) {
+  //       return res.status(404).json({error: 'El evento que se desea sincronizar no fué encontrado'})
+  //     }
 
-      const { summary, start, end } = eventExists
+  //     const { summary, start, end } = eventExists
 
-      setCredentials(code)
+  //     setCredentials(code)
 
-      const calendarAPI = google.calendar({version: 'v3', auth: auth2client})
+  //     const calendarAPI = google.calendar({version: 'v3', auth: auth2client})
 
-      await calendarAPI.events.insert({
-        auth: auth2client,
-        calendarId: process.env.CLIENT_ID,
-        requestBody: {
-          summary,
-          start,
-          end,          
-        }
-      })
+  //     await calendarAPI.events.insert({
+  //       auth: auth2client,
+  //       calendarId: process.env.CLIENT_ID,
+  //       requestBody: {
+  //         summary,
+  //         start,
+  //         end,          
+  //       }
+  //     })
 
-    } catch (error) {      
-      handleInternalError(error, 'An error happened while trying to create an event', res)
-    }
-  }
+  //   } catch (error) {      
+  //     return handleInternalError(error, 'An error happened while trying to create an event', res)
+  //   }
+  // }
 
   static deleteEvent = async (req: Request, res: Response) => {
     const id = req.params.eventId as string
@@ -191,9 +189,9 @@ class GoogleAPIController {
 
       await eventExists.deleteOne()
 
-      res.send('El evento ha sido eliminado, también en el calendario de Google!')
+      return res.send('El evento ha sido eliminado, también en el calendario de Google!')
     } catch (error) {
-      handleInternalError(error, 'Hubo un problema al intentar eliminar el evento', res)
+      return handleInternalError(error, 'Hubo un problema al intentar eliminar el evento', res)
     }
   }
 }
