@@ -29,9 +29,9 @@ class AuthController {
         id: userExists.id
       })
 
-      res.json(jwtToken)
+      return res.json(jwtToken)
     } catch (error) {
-      handleInternalError(error, 'Algo falló al intentar autenticarte', res)
+      return handleInternalError(error, 'Algo falló al intentar autenticarte', res)
     }
   }
 
@@ -65,7 +65,7 @@ class AuthController {
 
       res.json(req.user)
     } catch (error) {
-      handleInternalError(error, 'No te has autenticado!', res)
+      return handleInternalError(error, 'No te has autenticado!', res)
     }
   }
 }
