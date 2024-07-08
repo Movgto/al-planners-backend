@@ -10,7 +10,7 @@ const inputValidation = (req: Request, res: Response, next: NextFunction) => {
     return res.status(400).json({error: result.array()})
   }
 
-  next()
+  return next()
 }
 
 export default inputValidation
