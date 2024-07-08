@@ -1,4 +1,15 @@
-node_modules
+# Compiled JavaScript files
+lib
+lib/**/*.js
+lib/**/*.js.map
+
+# TypeScript v1 declaration files
+typings/
+
+# Node.js dependency directory
+node_modules/
+*.local
+
 package-lock.json
 .env
 dist
