@@ -9,11 +9,11 @@ router.get('/auth-url',
   GoogleAPIController.getAuthUrl
 )
 
-router.post('/events/:eventId',
-  param('eventId').isMongoId().withMessage('Invalid event ID'),
-  inputValidation,
-  GoogleAPIController.createEvent
-)
+// router.post('/events/:eventId',
+//   param('eventId').isMongoId().withMessage('Invalid event ID'),
+//   inputValidation,
+//   GoogleAPIController.createEvent
+// )
 
 router.post('/syncEvents',
   body('code').notEmpty().withMessage('Ocurrió un error al conectarse al calendario'),
