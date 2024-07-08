@@ -53,9 +53,9 @@ class AvailabilityController {
       
       await AvailabilityTime.create({startTime, endTime})
 
-      res.send('Tiempo de disponibilidad creado con éxito!')
+      return res.send('Tiempo de disponibilidad creado con éxito!')
     } catch (error) {
-      handleInternalError(error, 'Algo falló al intentar crear el tiempo de disponibilidad', res)
+      return handleInternalError(error, 'Algo falló al intentar crear el tiempo de disponibilidad', res)
     }
   }
 
@@ -104,9 +104,9 @@ class AvailabilityController {
 
       await availabilityExists.deleteOne()
 
-      res.send('Disponibilidad eliminada exitósamente!')
+      return res.send('Disponibilidad eliminada exitósamente!')
     } catch (error) {
-      handleInternalError(error, 'Algo falló al intentar eliminar la disponibilidad', res)
+      return handleInternalError(error, 'Algo falló al intentar eliminar la disponibilidad', res)
     }
   }
 
