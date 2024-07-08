@@ -1,4 +1,3 @@
-import { param } from "express-validator"
 import transport from "../config/nodemailer"
 import { dateFormater, formatHour } from "../helpers"
 import {HtmlForEventNotification} from '../helpers/Mailing'
