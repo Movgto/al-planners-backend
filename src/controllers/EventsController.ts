@@ -1,6 +1,6 @@
 import Event from "../models/Event"
 import {Request, Response} from 'express'
-import { dateFormater, getDateInTimezone, handleInternalError, isAvailabilityValid } from "../helpers"
+import { getDateInTimezone, handleInternalError, isAvailabilityValid } from "../helpers"
 import AvailabilityTime, { IAvailabilityTime } from "../models/AvailabilityTime"
 import Mailing from "../services/Mailing"
 
@@ -25,9 +25,9 @@ class EventsController {
                 return res.status(404).json({error: 'Evento no encontrado'})
             }
 
-            res.json(eventExists)
+            return res.json(eventExists)
         } catch (error) {
-            handleInternalError(error, 'Ocurrió un error al intentar obtener la cita', res)
+            return handleInternalError(error, 'Ocurrió un error al intentar obtener la cita', res)
         }
     }    
 
@@ -119,9 +119,9 @@ class EventsController {
                 date: date
             })
 
-            res.send('Nuevo evento creado exitosamente!\nRecuerda sincronizar tus eventos.')
+            return res.send('Nuevo evento creado exitosamente!\nRecuerda sincronizar tus eventos.')
         } catch (error) {
-            handleInternalError(error, 'Algo fallo al intentar crear un evento', res)
+            return handleInternalError(error, 'Algo fallo al intentar crear un evento', res)
         }
     }
 }
