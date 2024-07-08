@@ -38,10 +38,10 @@ export const auhtenticateAdmin = async (req: Request, res: Response, next: NextF
       req.user = userExists
 
     } else {
-      res.status(401).json({error: 'Acción no autorizada'})
+      return res.status(401).json({error: 'Acción no autorizada'})
     }
   } catch (error) {
-    handleInternalError(error, 'Algo falló al intentar autenticarte', res)
+    return handleInternalError(error, 'Algo falló al intentar autenticarte', res)
   }
 
   next()
