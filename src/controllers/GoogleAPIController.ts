@@ -86,12 +86,15 @@ class GoogleAPIController {
       console.log('Calendar Id', process.env.CALENDAR_ID)
 
       for (const e of eventList) {
+
+        const name1 = e.attendees[0].name.split(' ')[0]
+        const name2 = e.attendees[1].name.split(' ')[0]
         
         await calendarAPI.events.insert({
           calendarId: process.env.CALENDAR_ID,
           auth: auth2client,                    
           requestBody: {
-            summary: e.summary,
+            summary: name1 + ' & ' + name2 + ' - ' + e.summary,
             description: 'Description test',
             start: {
               dateTime: e.start.dateTime,
@@ -102,10 +105,10 @@ class GoogleAPIController {
               timeZone: 'America/Mexico_City'
             },
             id: e.id,
-            attendees: [{
-              displayName: e.attendee.name,
-              email: e.attendee.email
-            }]                 
+            attendees: e.attendees.map(at => ({
+              displayName: at.name,
+              email: at.email
+            }))              
           }                       
         })
 
