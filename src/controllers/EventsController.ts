@@ -113,9 +113,12 @@ class EventsController {
 
             const date = getDateInTimezone(new Date(newEvent.start.dateTime))
 
+            const displayName1 = newEvent.attendees[0].name.split(' ')[0]
+            const displayName2 = newEvent.attendees[1].name.split(' ')[0]
+
             await Mailing.sendAppointmentNotification({
-                name: newEvent.attendee.name,
-                email: newEvent.attendee.email,
+                name: displayName1 + ' & ' + displayName2,
+                email: newEvent.attendees[0].email,
                 date: date
             })
 
