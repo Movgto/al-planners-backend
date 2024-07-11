@@ -31,12 +31,12 @@ router.post('/',
 
         throw new Error('Invalid start object')
     }),
-    body('attendee').custom(val => {
-        if (typeof val === 'object' && val.name && val.email) {
-            return true       
+    body('attendees').custom(val => {
+        if (Array.isArray(val) && val.length == 2) {
+            return true
         }
 
-        throw new Error('Attendee doesn\'t have the required properties')
+        throw new Error('Attendees don\'t have the required properties')
     }),
     inputValidation,
     EventsController.createEvent
