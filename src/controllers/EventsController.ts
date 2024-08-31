@@ -1,13 +1,17 @@
 import Event from "../models/Event"
-import {Request, Response} from 'express'
+import { Request, Response } from 'express'
 import { getDateInTimezone, handleInternalError, isAvailabilityValid } from "../helpers"
 import AvailabilityTime, { IAvailabilityTime } from "../models/AvailabilityTime"
 import Mailing from "../services/Mailing"
+import Admin from "../models/Admin"
 
 class EventsController {
     static getEvents = async (req: Request, res: Response) => {
         try {
-            const events = await Event.find().sort({'start.dateTime': 'asc'})
+            const events = await Event.find().populate({
+                path: 'admin',
+                select: 'id email name'
+            }).sort({ 'start.dateTime': 'asc' })
 
             res.json(events)
         } catch (error) {
@@ -16,42 +20,60 @@ class EventsController {
     }
 
     static getEvent = async (req: Request, res: Response) => {
-        const {eventId} = req.params
+        const { eventId } = req.params
 
         try {
-            const eventExists = await Event.findById(eventId)
+            const eventExists = await Event.findById(eventId).populate({
+                path: 'admin',
+                select: 'id name email'
+            })
 
             if (!eventExists) {
-                return res.status(404).json({error: 'Evento no encontrado'})
+                return res.status(404).json({ error: 'Evento no encontrado' })
             }
 
             return res.json(eventExists)
         } catch (error) {
             return handleInternalError(error, 'Ocurrió un error al intentar obtener la cita', res)
         }
-    }    
+    }
 
     static createEvent = async (req: Request, res: Response) => {
         const event = req.body
-        
-        try {
-            const events = await Event.find()
 
-            
+        try {
+            const adminExists = await Admin.findById(req.body.admin)
+
+            if (!adminExists) {
+                return res.status(400).json({error: "The admin was not found"})
+            }
+
+            const events = await Event.find({admin: adminExists.id})
+
             const newEvent = new Event(event)
-            
+
             const newEventDate = getDateInTimezone(new Date(newEvent.start.dateTime))
-            
+
+            const newEventMonth = newEventDate.getMonth()
+
+            const newEventYear = newEventDate.getFullYear()
+
             const newEventStartHour = newEventDate.getHours()
-            
+
             const newEventEndHour = getDateInTimezone(new Date(newEvent.end.dateTime)).getHours()
-            
+
             const eventsWithSameStartTimes = events.filter(e => e.start.dateTime === newEvent.start.dateTime)
 
             const availableTimes = (await AvailabilityTime.find()).filter(a => {
                 const aDate = getDateInTimezone(new Date(a.startTime))
+                const availableYear = aDate.getFullYear()
+                const availableMonth = aDate.getMonth()                
 
-                if (aDate.getDate() === newEventDate.getDate()) {
+                if (
+                    newEventYear === availableYear &&
+                    newEventMonth === availableMonth &&
+                    aDate.getDate() === newEventDate.getDate()
+                ) {
                     return true
                 }
 
@@ -73,15 +95,15 @@ class EventsController {
                     }
                 }
             } else {
-                return res.status(409).json({error: 'No hay tiempo de disponibilidad para citas este día'})
+                return res.status(409).json({ error: 'No hay tiempo de disponibilidad para citas este día' })
             }
 
             if (!isInAvailableTime) {
-                return res.status(409).json({error: 'La cita que se intentó crear está fuera de los tiempos de disponibilidad'})
+                return res.status(409).json({ error: 'La cita que se intentó crear está fuera de los tiempos de disponibilidad' })
             }
 
             if (eventsWithSameStartTimes.length) {
-                return res.status(409).json({error: 'Ya hay una cita programada con la misma fecha y hora'})
+                return res.status(409).json({ error: 'Ya hay una cita programada con la misma fecha y hora' })
             }
 
             let isInMiddleOfOtherEvent = false
@@ -91,7 +113,7 @@ class EventsController {
 
                 if (eDate.getDate() === newEventDate.getDate()) {
                     const startHour = getDateInTimezone(new Date(e.start.dateTime)).getHours()
-                    const endHour = getDateInTimezone(new Date(e.end.dateTime)).getHours()                    
+                    const endHour = getDateInTimezone(new Date(e.end.dateTime)).getHours()
 
                     if (
                         (newEventStartHour < startHour && newEventEndHour > startHour)
@@ -106,7 +128,7 @@ class EventsController {
             }
 
             if (isInMiddleOfOtherEvent) {
-                return res.status(409).json({error: 'La cita que estás intentando crear queda en medio del curso de otra cita programada'})            
+                return res.status(409).json({ error: 'La cita que estás intentando crear queda en medio del curso de otra cita programada' })
             }
 
             await newEvent.save()
