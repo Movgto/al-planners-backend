@@ -33,4 +33,16 @@ router.get('/admins',
   AuthController.getAdmin
 )
 
+router.get(
+  '/adminsList',
+  auhtenticateAdmin,
+  AuthController.getAdmins
+)
+
+router.get(
+  '/admins/preferences',
+  auhtenticateAdmin,
+  AuthController.getAdminPreferences
+)
+
 export default router
