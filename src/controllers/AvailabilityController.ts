@@ -1,4 +1,4 @@
-import {Request, Response} from 'express'
+import { Request, Response } from 'express'
 import AvailabilityTime, { IAvailabilityTime } from '../models/AvailabilityTime'
 import { getDateInTimezone, getDateInTimezoneFromISO, handleInternalError, isAvailabilityValid } from '../helpers'
 import colors from 'colors'
@@ -6,28 +6,31 @@ import colors from 'colors'
 class AvailabilityController {
 
   static createAvailableTime = async (req: Request, res: Response) => {
-    const {startTime, endTime} = req.body
+    const { startTime, endTime } = req.body
 
     try {
-
       const date = getDateInTimezone(new Date(startTime))
+      const month = date.getMonth()
+      const year = date.getFullYear()
 
-      const diffBetweenHrs =  date.getHours() - getDateInTimezone(new Date(endTime)).getHours()
+      const diffBetweenHrs = date.getHours() - getDateInTimezone(new Date(endTime)).getHours()
 
       const absDiffBetweenHrs = Math.abs(diffBetweenHrs)
 
       if (diffBetweenHrs > 0) {
-        return res.status(400).json({error: 'El inicio de la disponibilidad no puede ser más tarde que el final'})
+        return res.status(400).json({ error: 'El inicio de la disponibilidad no puede ser más tarde que el final' })
       }
-      
+
       if (absDiffBetweenHrs < 1) {
-        return res.status(400).json({error: 'El tiempo de disponibilidad debe ser de al menos 1 hora'})
+        return res.status(400).json({ error: 'El tiempo de disponibilidad debe ser de al menos 1 hora' })
       }
 
       const availableTimes = (await AvailabilityTime.find()).filter(a => {
         const aDate = getDateInTimezone(new Date(a.startTime))
+        const monthOfAvailability = aDate.getMonth()
+        const yearOfAvailability = aDate.getFullYear()
 
-        if (date.getDate() === aDate.getDate()) {
+        if (date.getDate() === aDate.getDate() && monthOfAvailability === month && yearOfAvailability === year) {
           return true
         }
 
@@ -48,10 +51,10 @@ class AvailabilityController {
       }
 
       if (availabilityConflict) {
-        return res.status(409).json({error: 'El tiempo de disponibilidad que se intento crear está en conflicto con otro existente'})
-      }    
-      
-      await AvailabilityTime.create({startTime, endTime})
+        return res.status(409).json({ error: 'El tiempo de disponibilidad que se intento crear está en conflicto con otro existente' })
+      }
+
+      await AvailabilityTime.create({ startTime, endTime })
 
       return res.send('Tiempo de disponibilidad creado con éxito!')
     } catch (error) {
@@ -60,10 +63,12 @@ class AvailabilityController {
   }
 
   static getAvailableTime = async (req: Request, res: Response) => {
-    const {date: isoDate} = req.params
+    const { date: isoDate } = req.params
 
     try {
       const date = getDateInTimezone(new Date(isoDate))
+      const monthToSearch = date.getMonth()
+      const yearToSearch = date.getFullYear()
 
       console.log('====== Fecha para buscar disponibilidad ======')
       console.log(date)
@@ -72,14 +77,16 @@ class AvailabilityController {
         "startTime": "asc"
       })
 
-      
+
       const availableTimesArray = availableTimes.filter(a => {
         const aDate = getDateInTimezone(new Date(a.startTime))
+        const month = aDate.getMonth()
+        const year = aDate.getFullYear()
 
         console.log('====== Fecha disponible hora de inicio ======')
         console.log(aDate)
 
-        if (aDate.getDate() === date.getDate()) {          
+        if (aDate.getDate() === date.getDate() && month === monthToSearch && yearToSearch === year) {
           return true
         }
 
@@ -93,13 +100,13 @@ class AvailabilityController {
   }
 
   static deleteAvailableTime = async (req: Request, res: Response) => {
-    const {availabilityId} = req.params
+    const { availabilityId } = req.params
 
     try {
       const availabilityExists = await AvailabilityTime.findById(availabilityId)
 
       if (!availabilityExists) {
-        return res.status(404).json({error: 'No se encontro la disponibilidad que se intentaba eliminar'})
+        return res.status(404).json({ error: 'No se encontro la disponibilidad que se intentaba eliminar' })
       }
 
       await availabilityExists.deleteOne()
@@ -111,29 +118,29 @@ class AvailabilityController {
   }
 
   static getAvailableTimes = async (req: Request, res: Response) => {
-    const {date: isoDate} = req.params
-    
+    const { date: isoDate } = req.params
+
     try {
-        const date = getDateInTimezoneFromISO(isoDate)
-        date.setHours(0,0,0,0)
+      const date = getDateInTimezoneFromISO(isoDate)
+      date.setHours(0, 0, 0, 0)
 
-        const availableTimes = await AvailabilityTime.find().sort({
-          "startTime": "asc"
-        })
-        
-        
-        const filtered = availableTimes.filter(a => {
-          const aDate = getDateInTimezone(new Date(a.startTime))
-          if (aDate.getTime() < date.getTime()) return false
+      const availableTimes = await AvailabilityTime.find().sort({
+        "startTime": "asc"
+      })
 
-          return true
-        })
 
-        res.json(filtered)
+      const filtered = availableTimes.filter(a => {
+        const aDate = getDateInTimezone(new Date(a.startTime))
+        if (aDate.getTime() < date.getTime()) return false
+
+        return true
+      })
+
+      res.json(filtered)
     } catch (error) {
-        handleInternalError(error, 'Algo falló al intentar obtener la disponibilidad', res)
+      handleInternalError(error, 'Algo falló al intentar obtener la disponibilidad', res)
     }
-}
+  }
 }
 
 export default AvailabilityController
