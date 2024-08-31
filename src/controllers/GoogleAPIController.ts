@@ -4,6 +4,8 @@ import colors from 'colors'
 import { handleInternalError } from '../helpers'
 import Event from '../models/Event'
 import { google } from 'googleapis'
+import Admin from '../models/Admin'
+import AdminPreferences from '../models/AdminPreferences'
 
 let refreshToken = ''
 
@@ -86,6 +88,18 @@ class GoogleAPIController {
       console.log('Calendar Id', process.env.CALENDAR_ID)
 
       for (const e of eventList) {
+        const eventAdmin = await Admin.findById(e.admin)
+        if (!eventAdmin) {
+          return res.status(404).json({error: 'The admin of an event was not found'})
+        }
+
+        let adminPreferences = await AdminPreferences.findOne({admin: eventAdmin.id})
+
+        if (!adminPreferences) {
+          const adminPreferences = new AdminPreferences({admin: eventAdmin.id})
+
+          await adminPreferences.save()
+        }
 
         const name1 = e.attendees[0].name.split(' ')[0]
         const name2 = e.attendees[1].name.split(' ')[0]
@@ -108,8 +122,9 @@ class GoogleAPIController {
             attendees: e.attendees.map(at => ({
               displayName: at.name,
               email: at.email
-            }))              
-          }                       
+            })),
+            colorId: adminPreferences!.eventColorId               
+          }                     
         })
 
         e.sentToCalendar = true
