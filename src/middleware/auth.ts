@@ -33,12 +33,12 @@ export const auhtenticateAdmin = async (req: Request, res: Response, next: NextF
 
       req.admin = adminExists
 
+      next()
+      return
     } else {
       return res.status(401).json({error: 'Acción no autorizada'})
     }
   } catch (error) {
     return handleInternalError(error, 'Algo falló al intentar autenticarte', res)
-  }
-
-  next()
+  }  
 }
