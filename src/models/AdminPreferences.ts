@@ -33,7 +33,7 @@ const adminPreferencesSchema: Schema = new Schema({
   },
   eventColorId: {
     type: String,
-    default: randomColor()
+    default: randomColor
   }
 })
 
