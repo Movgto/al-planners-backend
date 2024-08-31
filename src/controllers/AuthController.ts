@@ -56,7 +56,7 @@ class AuthController {
         return res.status(401).json({ error: 'No te has autenticado' })
       }
 
-      res.json(req.admin)
+      return res.json(req.admin)
     } catch (error) {
       return handleInternalError(error, 'No te has autenticado!', res)
     }
