@@ -1,12 +1,12 @@
 import {Request, Response, NextFunction} from 'express'
-import User, { IUser } from '../models/User'
 import { verify } from 'jsonwebtoken'
 import { handleInternalError } from '../helpers'
+import Admin, { IAdmin } from '../models/Admin'
 
 declare global {
   namespace Express {
-    interface Request {
-      user: IUser
+    interface Request {      
+      admin: IAdmin
     }
   }
 }
@@ -25,17 +25,13 @@ export const auhtenticateAdmin = async (req: Request, res: Response, next: NextF
 
     if (typeof userData === 'object' && userData.id) {
 
-      const userExists = await User.findById(userData.id).select('id email name admin')
+      const adminExists = await Admin.findById(userData.id).select('id email name')
 
-      if (!userExists) {
+      if (!adminExists) {
         return res.status(404).json({error: 'Usuario no encontrado'})
-      }
+      }      
 
-      if (!userExists.admin) {
-        return res.status(401).json({error: 'Acción no autorizada'})
-      }
-
-      req.user = userExists
+      req.admin = adminExists
 
     } else {
       return res.status(401).json({error: 'Acción no autorizada'})
