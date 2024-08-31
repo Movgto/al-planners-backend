@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 interface IEvent extends Document {
     summary: string,
@@ -12,7 +12,8 @@ interface IEvent extends Document {
     attendees: {
         name: string
         email: string
-    }[]
+    }[],
+    admin: Types.ObjectId
 }
 
 const rangeSchema : Schema = new Schema({
@@ -51,6 +52,11 @@ export const eventSchema : Schema = new Schema({
         type: [
             attendeeSchema
         ],
+        required: true
+    },
+    admin: {
+        type: Types.ObjectId,
+        ref: 'Admin',
         required: true
     }
 }, {timestamps: true})
