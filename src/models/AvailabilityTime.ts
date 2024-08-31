@@ -1,11 +1,11 @@
-import mongoose, {Document, Schema} from "mongoose"
+import mongoose, { Document, Schema } from "mongoose"
 
 export interface IAvailabilityTime extends Document {
   startTime: string
   endTime: string
 }
 
-const availabilityTimeSchema : Schema = new Schema({
+const availabilityTimeSchema: Schema = new Schema({
   startTime: {
     type: String,
     required: true
