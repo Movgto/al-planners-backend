@@ -9,6 +9,7 @@ import eventsRouter from './routes/eventsRouter'
 import eventTypesRouter from './routes/eventTypesRouter'
 import availabilityRouter from './routes/availabilityRoutes'
 import authRouter from './routes/authRouter'
+import adminPreferencesRouter from './routes/adminPreferencesRouter'
 
 configDotenv()
 
@@ -26,6 +27,7 @@ app.use('/api/googleapi', googleapiRouter)
 app.use('/api/events', eventsRouter)
 app.use('/api/eventTypes', eventTypesRouter)
 app.use('/api/availability', availabilityRouter)
+app.use('/api/adminPreferences', adminPreferencesRouter)
 
 //Auth routes
 app.use('/api/auth', authRouter)
