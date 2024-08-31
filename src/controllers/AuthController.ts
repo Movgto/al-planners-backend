@@ -1,32 +1,29 @@
-import {Request, Response} from 'express'
-import User from '../models/User'
+import { Request, Response } from 'express'
 import { generateJWT, hashPassword } from '../helpers/auth'
 import { handleInternalError } from '../helpers'
 import { compare } from 'bcrypt'
+import Admin from '../models/Admin'
+import AdminPreferences from '../models/AdminPreferences'
 
 class AuthController {
   static adminLogin = async (req: Request, res: Response) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
 
     try {
-      const userExists = await User.findOne({email})
+      const adminExists = await Admin.findOne({ email })
 
-      if (!userExists) {
-        return res.status(404).json({error: 'No se ha encontrado un usuario con el correo proporcionado'})
+      if (!adminExists) {
+        return res.status(404).json({ error: 'No se ha encontrado un usuario con el correo proporcionado' })
       }
 
-      const passwordsMatch = compare(password, userExists.password)
+      const passwordsMatch = compare(password, adminExists.password)
 
       if (!passwordsMatch) {
-        return res.status(400).json({error: 'La contraseña es incorrecta'})
-      }
-
-      if (!userExists.admin) {
-        return res.status(409).json({error: 'No eres administrador'})
+        return res.status(400).json({ error: 'La contraseña es incorrecta' })
       }
 
       const jwtToken = generateJWT({
-        id: userExists.id
+        id: adminExists.id
       })
 
       return res.json(jwtToken)
@@ -37,17 +34,17 @@ class AuthController {
 
   static adminSignUp = async (req: Request, res: Response) => {
     try {
-      const newUser = new User(req.body)
+      const newAdmin = new Admin(req.body)
 
-      newUser.password = await hashPassword(newUser.password)
+      newAdmin.password = await hashPassword(newAdmin.password)
 
-      newUser.confirmed = true
+      await newAdmin.save()
 
-      newUser.admin = true
+      const adminPreferences = new AdminPreferences({admin: newAdmin.id})
 
-      await newUser.save()
+      await adminPreferences.save()
 
-      res.send('Usuario creado exitosamente!')
+      res.send('Administrador creado exitosamente!')
     } catch (error) {
       handleInternalError(error, 'Hubo un problema al intentar crear un nuevo usuario', res)
     }
@@ -55,18 +52,38 @@ class AuthController {
 
   static getAdmin = (req: Request, res: Response) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({error: 'No te has autenticado'})
+      if (!req.admin) {
+        return res.status(401).json({ error: 'No te has autenticado' })
       }
 
-      if (!req.user.admin) {
-        return res.status(401).json({error: 'No te has autenticado'})
-      }
-
-      res.json(req.user)
+      res.json(req.admin)
     } catch (error) {
       return handleInternalError(error, 'No te has autenticado!', res)
     }
+  }
+
+  static getAdmins = async (req: Request, res: Response) => {
+    const admins = await Admin.find().select('id name email')
+
+    res.json(admins)
+  }
+
+  static getAdminPreferences = async (req: Request, res: Response) => {
+    const adminPreferencesExists = await AdminPreferences.findOne({admin: req.admin.id})
+
+    if (!adminPreferencesExists) {
+      const adminPreferences = new AdminPreferences({admin: req.admin.id})
+
+      try {
+        await adminPreferences.save()
+
+        return res.json(adminPreferences)
+      } catch (error) {
+        return res.status(400).json({error: 'Algo falló al obtener las preferencias del administrador'})
+      }      
+    }
+
+    return res.json(adminPreferencesExists)
   }
 }
 
