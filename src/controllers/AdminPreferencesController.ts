@@ -4,18 +4,21 @@ import AdminPreferences from '../models/AdminPreferences'
 
 class AdminPreferencesController {
   static updateEventColor = async (req: Request, res: Response) => {
-    const { colorId } = req.body
+    const { colorId } = req.params
 
     try {
-      const adminPreferences = await AdminPreferences.findOne({ admin: req.admin.id })
+      const updatedAdminPreferences = await AdminPreferences.findOneAndUpdate({admin: req.admin.id}, {eventColorId: colorId})
 
-      if (!adminPreferences) {
-        return res.status(404).json({error: 'Hubo un error al intentar obtener las preferencias del administrador'})
+      
+      if (!updatedAdminPreferences) {
+        return res.status(404).json({ error: 'Hubo un error al intentar obtener las preferencias del administrador' })
       }
+      console.log('Color id to update to:', colorId)
+      console.log('------ Preferencias del administrador actualizadas ------')
+      console.log(updatedAdminPreferences)
+      // adminPreferences.eventColorId = colorId
 
-      adminPreferences.eventColorId = colorId
-
-      adminPreferences.save()
+      // await adminPreferences.save()
 
       return res.send('Color del evento actualizado!')
 
