@@ -3,8 +3,7 @@ import mongoose, {Document, Schema} from 'mongoose'
 export interface IUser extends Document {
   name: string
   email: string
-  password: string
-  admin: boolean
+  password: string  
   confirmed: boolean
 }
 
@@ -24,11 +23,7 @@ const userSchema : Schema = new Schema({
     type: String,
     required: true,
     trim: true
-  },
-  admin: {
-    type: Boolean,
-    default: false
-  },
+  },  
   confirmed: {
     type: Boolean,
     default: false
