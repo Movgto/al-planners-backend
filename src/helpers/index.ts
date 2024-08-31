@@ -6,7 +6,7 @@ export const handleInternalError = (error: unknown, errorMsg: string, res: Respo
     const err = new Error(errorMsg)
     console.log(colors.bgMagenta(err.message))
     console.log(error)
-    res.status(500).json({ error: err.message })
+    return res.status(500).json({ error: err.message })
 }
 
 export const dateFormater = (isoDate: string) => {
