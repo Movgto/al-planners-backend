@@ -15,6 +15,11 @@ router.get('/:eventId',
     EventsController.getEvent
 )
 
+router.get(
+    '/adminsList',
+    
+)
+
 router.post('/',
     body('summary').notEmpty().withMessage('Summary must not be empty'),
     body('start').custom(val => {
@@ -29,7 +34,7 @@ router.post('/',
             return true
         }
 
-        throw new Error('Invalid start object')
+        throw new Error('Invalid end object')
     }),
     body('attendees').custom(val => {
         if (Array.isArray(val) && val.length == 2) {
@@ -38,6 +43,7 @@ router.post('/',
 
         throw new Error('Attendees don\'t have the required properties')
     }),
+    body('admin').isMongoId().withMessage('Invalid admin'),
     inputValidation,
     EventsController.createEvent
 )
