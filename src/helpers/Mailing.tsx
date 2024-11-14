@@ -3,7 +3,7 @@ import { Html, Container, Body, Tailwind, Heading, Text, Img } from '@react-emai
 type MailingProps = {
   name: string
   date: string
-  hour: string
+  hour: string  
 }
 
 export const HtmlForEventNotification = (props: Pick<MailingProps, 'name' | 'hour' | 'date'>) => {
@@ -24,14 +24,14 @@ export const HtmlForEventNotification = (props: Pick<MailingProps, 'name' | 'hou
             </Heading>
             <Img
               src="cid:alplannerslogo"
-              alt="al planners logo"              
-              className="w-full"              
+              alt="al planners logo"
+              className="w-full"
             />
             <Text
               className='text-center text-lg'
             >
               Te estaremos esperando el{' '}
-              <span className='font-bold text-rose-400'>{props.date}</span> a las <strong>{props.hour}</strong>!
+              <span className='font-bold text-rose-400'>{props.date}</span> a las <strong>{props.hour}</strong>!              
             </Text>
           </Container>
         </Body>
