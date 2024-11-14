@@ -2,7 +2,6 @@ import Event from "../models/Event"
 import { Request, Response } from 'express'
 import { getDateInTimezone, handleInternalError, isAvailabilityValid } from "../helpers"
 import AvailabilityTime, { IAvailabilityTime } from "../models/AvailabilityTime"
-import Mailing from "../services/Mailing"
 import Admin from "../models/Admin"
 
 class EventsController {
@@ -131,18 +130,7 @@ class EventsController {
                 return res.status(409).json({ error: 'La cita que estás intentando crear queda en medio del curso de otra cita programada' })
             }
 
-            await newEvent.save()
-
-            const date = getDateInTimezone(new Date(newEvent.start.dateTime))
-
-            const displayName1 = newEvent.attendees[0].name.split(' ')[0]
-            const displayName2 = newEvent.attendees[1].name.split(' ')[0]
-
-            await Mailing.sendAppointmentNotification({
-                name: displayName1 + ' & ' + displayName2,
-                email: newEvent.attendees[0].email,
-                date: date
-            })
+            await newEvent.save()            
 
             return res.send('Nuevo evento creado exitosamente!\nRecuerda sincronizar tus eventos.')
         } catch (error) {
