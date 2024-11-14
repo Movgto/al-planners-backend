@@ -123,8 +123,9 @@ class GoogleAPIController {
               displayName: at.name,
               email: at.email
             })),
-            colorId: adminPreferences!.eventColorId               
-          }                     
+            colorId: adminPreferences!.eventColorId              
+          },
+          sendUpdates: 'all'
         })
 
         e.sentToCalendar = true
