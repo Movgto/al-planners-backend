@@ -1,11 +1,12 @@
-import type {Request, Response} from 'express'
-import {auth2client} from '../config/googleapi'
+import type { Request, Response } from 'express'
+import { auth2client } from '../config/googleapi'
 import colors from 'colors'
-import { handleInternalError } from '../helpers'
+import { getDateInTimezone, handleInternalError } from '../helpers'
 import Event from '../models/Event'
 import { google } from 'googleapis'
 import Admin from '../models/Admin'
 import AdminPreferences from '../models/AdminPreferences'
+import Mailing from '../services/Mailing'
 
 let refreshToken = ''
 
@@ -15,7 +16,7 @@ const setCredentials = async (code: string) => {
       refresh_token: refreshToken
     })
   } else {
-    const {tokens} = await auth2client.getToken(code)
+    const { tokens } = await auth2client.getToken(code)
     refreshToken = tokens && tokens.refresh_token ? tokens.refresh_token : ''
 
     auth2client.setCredentials(tokens)
@@ -24,7 +25,7 @@ const setCredentials = async (code: string) => {
     console.log(code)
     console.log(tokens)
     console.log('====== Calendar ID ======')
-    console.log(process.env.CALENDAR_ID)        
+    console.log(process.env.CALENDAR_ID)
   }
 }
 
@@ -35,8 +36,8 @@ class GoogleAPIController {
         access_type: 'offline',
         scope: 'https://www.googleapis.com/auth/calendar'
       })
-  
-      res.json({url})
+
+      res.json({ url })
     } catch (error) {
       const errorMessage = 'Something went wrong while trying to generate an auth url'
       handleInternalError(error, errorMessage, res)
@@ -44,13 +45,13 @@ class GoogleAPIController {
   }
 
   static getEvents = async (req: Request, res: Response) => {
-    const {code} = req.query
+    const { code } = req.query
 
     try {
       await setCredentials(code as string)
 
-      const calendarAPI = google.calendar({version: 'v3', auth: auth2client})
-      
+      const calendarAPI = google.calendar({ version: 'v3', auth: auth2client })
+
       const events = await calendarAPI.events.list({
         calendarId: process.env.CALENDAR_ID,
         timeMin: new Date().toISOString(),
@@ -58,7 +59,7 @@ class GoogleAPIController {
         orderBy: 'startTime'
       })
 
-      res.json({events: events.data.items})
+      res.json({ events: events.data.items })
     } catch (error) {
       console.log(colors.bgMagenta('An error happened while trying to connect to Google Calendar API'))
       console.log(error)
@@ -75,38 +76,38 @@ class GoogleAPIController {
     console.log(code)
 
     try {
-      const eventList = await Event.find({sentToCalendar: false})
+      const eventList = await Event.find({ sentToCalendar: false })
 
       if (!eventList || !eventList.length) {
-        return res.status(404).json({error: 'No hay eventos para sincronizar'})
-      }      
+        return res.status(404).json({ error: 'No hay eventos para sincronizar' })
+      }
 
       await setCredentials(code)
 
-      const calendarAPI = google.calendar({version: 'v3', auth: auth2client})
+      const calendarAPI = google.calendar({ version: 'v3', auth: auth2client })
 
       console.log('Calendar Id', process.env.CALENDAR_ID)
 
       for (const e of eventList) {
         const eventAdmin = await Admin.findById(e.admin)
         if (!eventAdmin) {
-          return res.status(404).json({error: 'The admin of an event was not found'})
+          return res.status(404).json({ error: 'The admin of an event was not found' })
         }
 
-        let adminPreferences = await AdminPreferences.findOne({admin: eventAdmin.id})
+        let adminPreferences = await AdminPreferences.findOne({ admin: eventAdmin.id })
 
         if (!adminPreferences) {
-          const adminPreferences = new AdminPreferences({admin: eventAdmin.id})
+          const adminPreferences = new AdminPreferences({ admin: eventAdmin.id })
 
           await adminPreferences.save()
         }
 
         const name1 = e.attendees[0].name.split(' ')[0]
         const name2 = e.attendees[1].name.split(' ')[0]
-        
+
         await calendarAPI.events.insert({
           calendarId: process.env.CALENDAR_ID,
-          auth: auth2client,                    
+          auth: auth2client,
           requestBody: {
             summary: name1 + ' & ' + name2 + ' - ' + e.summary,
             description: 'Description test',
@@ -123,9 +124,21 @@ class GoogleAPIController {
               displayName: at.name,
               email: at.email
             })),
-            colorId: adminPreferences!.eventColorId              
+            colorId: adminPreferences!.eventColorId
           },
+          sendNotifications: true,
           sendUpdates: 'all'
+        })
+
+        const date = getDateInTimezone(new Date(e.start.dateTime))
+
+        const displayName1 = e.attendees[0].name.split(' ')[0]
+        const displayName2 = e.attendees[1].name.split(' ')[0]
+
+        await Mailing.sendAppointmentNotification({
+          name: displayName1 + ' & ' + displayName2,
+          email: e.attendees[0].email,
+          date: date
         })
 
         e.sentToCalendar = true
@@ -134,11 +147,10 @@ class GoogleAPIController {
       }
 
       return res.send('Eventos sincronizados con éxito!')
-      
-    } catch (error) {      
+
+    } catch (error) {
       return handleInternalError(error, 'An error happened while trying to create an event', res)
     }
-
   }
 
   // static createEvent = async (req: Request, res: Response) => {
@@ -176,13 +188,13 @@ class GoogleAPIController {
   static deleteEvent = async (req: Request, res: Response) => {
     const id = req.params.eventId as string
     const code = req.body.code as string
-    
+
     try {
 
       const eventExists = await Event.findById(id)
 
       if (!eventExists) {
-        return res.status(404).json({error: 'No se encontró el evento a eliminar'})
+        return res.status(404).json({ error: 'No se encontró el evento a eliminar' })
       }
 
       if (!eventExists.sentToCalendar) {
@@ -193,12 +205,12 @@ class GoogleAPIController {
       }
 
       if (!code) {
-        return res.status(400).json({error: 'Necesitas acceder con Google antes de eliminar un evento que ha sido sincronizado'})        
+        return res.status(400).json({ error: 'Necesitas acceder con Google antes de eliminar un evento que ha sido sincronizado' })
       }
 
       await setCredentials(code)
 
-      const calendar = google.calendar({version: 'v3', auth: auth2client})
+      const calendar = google.calendar({ version: 'v3', auth: auth2client })
 
       await calendar.events.delete({
         auth: auth2client,
