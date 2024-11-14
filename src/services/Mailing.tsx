@@ -6,7 +6,7 @@ import {render} from '@react-email/components'
 type MailingParams = {
   name: string
   email: string
-  date: Date
+  date: Date  
 }
 
 class Mailing {
